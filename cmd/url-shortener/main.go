@@ -24,12 +24,30 @@ func main() {
 
 	logger.Info("starting server", "address", cfg.HTTPServer.Address)
 
-	_, err := sqlite.New(cfg.StoragePath)
+	storage, err := sqlite.New(cfg.StoragePath)
 
 	if err != nil {
 		logger.Error("cannot create storage", sl.Err(err))
 		os.Exit(1)
 	}
+
+	id, err := storage.SaveURL("http://google.com", "google")
+
+	if err != nil {
+		logger.Error("cannot save url", sl.Err(err))
+		os.Exit(1)
+	}
+
+	logger.Info("url saved", "id", id)
+
+	id, err = storage.SaveURL("http://google.com", "google")
+
+	if err != nil {
+		logger.Error("cannot save url", sl.Err(err))
+		os.Exit(1)
+	}
+
+	logger.Info("url saved", "id", id)
 }
 
 func setupLogger(env string) *slog.Logger {
