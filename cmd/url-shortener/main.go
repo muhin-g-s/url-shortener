@@ -46,7 +46,12 @@ func main() {
 	router.Use(mwLogger.New(logger))
 	router.Use(middleware.URLFormat)
 
-	router.Post("/", save.New(logger, storage))
+	router.Route("/url", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url-shortener", map[string]string{cfg.HTTPServer.User: cfg.HTTPServer.Password}))
+
+		r.Post("/", save.New(logger, storage))
+	})
+
 	router.Get("/{alias}", redirect.New(logger, storage))
 
 	srv := &http.Server{
