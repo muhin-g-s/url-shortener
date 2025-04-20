@@ -6,3 +6,10 @@ packages:
           dir: internal/http-server/handlers/url/save/mocks
           pkgname: mocks
           filename: URLSaver.go
+  url-shortener/internal/http-server/handlers/redirect:
+    interfaces:
+      URLGetter:
+        config:
+          dir: internal/http-server/handlers/redirect/mocks
+          pkgname: mocks
+          filename: URLGetter.go
