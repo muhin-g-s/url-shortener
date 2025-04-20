@@ -21,7 +21,7 @@ func New(storagePath string) (*Storage, error) {
 	}
 
 	stmt, err := db.Prepare(`
-		CREATE TABLE IF NOT EXISTS urls (
+		CREATE TABLE IF NOT EXISTS url (
 			id INTEGER PRIMARY KEY,
 			alias TEXT NOT NULL UNIQUE,
 			url TEXT NOT NULL); 
