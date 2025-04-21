@@ -44,6 +44,20 @@ func New(storagePath string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
+func (s *Storage) Close() error {
+	const op = "storage.sqlite.Close"
+
+	if s.db == nil {
+		return fmt.Errorf("%s: database connection is not initialized", op)
+	}
+
+	if err := s.db.Close(); err != nil {
+		return fmt.Errorf("%s: failed to close database connection: %w", op, err)
+	}
+
+	return nil
+}
+
 func (s *Storage) SaveURL(urlToSave, alias string) (int64, error) {
 	const op = "storage.sqlite.saveURL"
 

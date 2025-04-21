@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"url-shortener/internal/config"
 	"url-shortener/internal/http-server/handlers/redirect"
@@ -62,9 +66,33 @@ func main() {
 		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
 
-	if err := srv.ListenAndServe(); err != nil {
-		logger.Error("cannot start server", sl.Err(err))
-		os.Exit(1)
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Error("cannot start server", sl.Err(err))
+		}
+	}()
+
+	logger.Info("server started")
+
+	<-done
+	logger.Info("stopping server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("failed to stop server", sl.Err(err))
+
+		return
+	}
+
+	if err := storage.Close(); err != nil {
+		logger.Error("failed to close storage", sl.Err(err))
+	} else {
+		logger.Info("storage connection closed")
 	}
 
 	logger.Info("server stopped")
